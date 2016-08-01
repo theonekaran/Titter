@@ -22,7 +22,7 @@ class User: NSObject {
         self.dictionary = dictionary
         
         name = dictionary["name"] as? String
-        screenname = dictionary["screen_name"] as? String
+        screenname = "@" + (dictionary["screen_name"] as? String)!
         
         let profileURLString = dictionary["profile_image_url_https"] as? String
         if let profileURLString = profileURLString {

@@ -90,5 +90,37 @@ class TwitterClient: BDBOAuth1SessionManager {
         }
     }
     
+    func addFavorite(id: Int) {
+        POST("1.1/favorites/create.json", parameters: ["id":id], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+//            print(response)
+        }) { (task: NSURLSessionDataTask?, error: NSError) in
+                print(error.localizedDescription)
+        }
+    }
+    
+    func removeFavorite(id: Int) {
+        POST("1.1/favorites/destroy.json", parameters: ["id":id], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+            //            print(response)
+        }) { (task: NSURLSessionDataTask?, error: NSError) in
+            print(error.localizedDescription)
+        }
+    }
+    
+    func reTweet(id: Int) {
+        POST("1.1/statuses/retweet/\(id).json", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+//                        print(response)
+        }) { (task: NSURLSessionDataTask?, error: NSError) in
+            print(error.localizedDescription)
+        }
+    }
+    
+    func unReTweet(id: Int) {
+        POST("1.1/statuses/unretweet/\(id).json", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+            //            print(response)
+        }) { (task: NSURLSessionDataTask?, error: NSError) in
+            print(error.localizedDescription)
+        }
+    }
+    
     
 }

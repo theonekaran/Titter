@@ -8,8 +8,8 @@
 
 import UIKit
 
-@objc protocol newTweetViewControllerDelegate {
-    optional func NewTweetViewController(newTweetViewController: NewTweetViewController, didTweet tweet: Tweet)
+@objc protocol NewTweetViewControllerDelegate {
+    optional func newTweetViewController(newTweetViewController: NewTweetViewController, didTweet tweet: Tweet)
 }
 
 class NewTweetViewController: UIViewController, UITextViewDelegate {
@@ -21,14 +21,14 @@ class NewTweetViewController: UIViewController, UITextViewDelegate {
     @IBOutlet weak var tweetCountButton: UIBarButtonItem!
     var tweet: Tweet!
     
-    weak var delegate: newTweetViewControllerDelegate?
+    weak var delegate: NewTweetViewControllerDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         profileImageView.setImageWithURL((User.currentUser?.profileURL)!)
         userNameLabel.text = User.currentUser?.name as? String
-        screenNameLabel.text =  "@" + ((User.currentUser?.screenname)! as String)
+        screenNameLabel.text =  User.currentUser?.screenname as? String
         
         tweetTextView.becomeFirstResponder()
         tweetTextView.delegate = self
@@ -51,7 +51,7 @@ class NewTweetViewController: UIViewController, UITextViewDelegate {
         TwitterClient.sharedInstance.statusUpdate((tweetTextView.text), success: { (tweet: Tweet) in
             self.tweet = tweet
             self.dismissViewControllerAnimated(true, completion: nil)
-            delegate?.NewTweetViewController?(self, didTweet: self.tweet)
+            self.delegate?.newTweetViewController?(self, didTweet: self.tweet)
         }) { (error: NSError) in
                 print(error.localizedDescription)
         }

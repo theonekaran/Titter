@@ -19,15 +19,38 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var reTweetButton: UIButton!
     @IBOutlet weak var likeButton: UIButton!
     
+    var liked: Bool = false
+    var retweeted: Bool = false
+    
+    
+    let likeImageON = UIImage(named: "like-action-on")
+    let likeImageOff = UIImage(named: "like-action-pressed")
+    let retweetImageON = UIImage(named: "retweet-action-on")
+    let retweetImageOff = UIImage(named: "retweet-action-pressed")
+    
     var tweet: Tweet! {
         didSet{
             tweetLabel.text = tweet.text as? String
             userNameLabel.text = tweet.user?.name as? String
-            screenNameLabel.text = "@\((tweet.user?.screenname! as? String)!)"
+            screenNameLabel.text = tweet.user?.screenname! as? String
             let formatter = NSDateFormatter()
             formatter.dateFormat = "M/dd/yy"
             timeStampLabel.text = formatter.stringFromDate(tweet.timestamp!)
             profileImageView.setImageWithURL((tweet.user?.profileURL)!)
+            
+            if tweet.isFavorite == 1 {
+                liked = true
+                likeButton.setImage(likeImageON, forState: .Normal)
+            } else {
+                liked = false
+            }
+            
+            if tweet.isRetweeted == 1 {
+                retweeted = true
+                reTweetButton.setImage(retweetImageON, forState: .Normal)
+            } else {
+                retweeted = false
+            }
         }
     }
     

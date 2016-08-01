@@ -8,9 +8,10 @@
 
 import UIKit
 
-class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NewTweetViewControllerDelegate {
 
     @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var newTweetButton: UIBarButtonItem!
     
     var tweets: [Tweet]!
     
@@ -70,14 +71,32 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @IBAction func onLogOutButton(sender: AnyObject) {
         TwitterClient.sharedInstance.logout()
     }
-    /*
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
+        if segue.identifier == "TweetViewtoNewTweet" {
+            let navigationController = segue.destinationViewController as! UINavigationController
+            let newTweetViewController = navigationController.topViewController as! NewTweetViewController
+            
+            newTweetViewController.delegate = self
+        } else if ((sender?.isKindOfClass(UITableViewCell)) == true) {
+            var tweet: Tweet!
+            let cell = sender as! UITableViewCell
+            let indexPath = tableView.indexPathForCell(cell)
+            tweet = tweets[indexPath!.row]
+            let tweetDetailViewController = segue.destinationViewController as! TweetDetailViewController
+            tweetDetailViewController.tweet = tweet
+        }
     }
-    */
+    
+    func newTweetViewController(newTweetViewController: NewTweetViewController, didTweet tweet: Tweet) {
+        self.tweets.insert(tweet, atIndex: 0)
+        tableView.reloadData()
+    }
+ 
 
 }
