@@ -46,14 +46,14 @@ class TweetDetailViewController: UIViewController {
         retweetCountLabel.text = String(tweet.retweetCount)
         likesCountLabel.text = String(tweet.favoritesCount)
         
-        if tweet.isFavorite == 1 {
+        if tweet.isFavorite {
             liked = true
             likeButton.setImage(likeImageON, forState: .Normal)
         } else {
             liked = false
         }
         
-        if tweet.isRetweeted == 1 {
+        if tweet.isRetweeted{
             retweeted = true
             retweetButton.setImage(retweetImageON, forState: .Normal)
         } else {
@@ -83,10 +83,12 @@ class TweetDetailViewController: UIViewController {
         if retweeted {
             retweeted = false
             retweetButton.setImage(retweetImageOff, forState: .Normal)
+            
             TwitterClient.sharedInstance.unReTweet(tweet.id)
         } else {
             retweeted = true
             retweetButton.setImage(retweetImageON, forState: .Normal)
+            print(tweet.id)
             TwitterClient.sharedInstance.reTweet(tweet.id)
         }
     }

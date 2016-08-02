@@ -25,6 +25,7 @@ class TwitterClient: BDBOAuth1SessionManager {
             let url = NSURL(string: "https://api.twitter.com/oauth/authorize?oauth_token=\(requestToken.token)")!
             UIApplication.sharedApplication().openURL(url)
         }) { (error: NSError!) in
+            print("login Error")
             self.loginFailure?(error)
         }
     }
@@ -39,11 +40,13 @@ class TwitterClient: BDBOAuth1SessionManager {
                     self.loginSuccess?()
                     
                     }, failure: { (error: NSError) in
+                        print("handleOpenURL Error")
                         self.loginFailure!(error)
                 })
                 
                 
         }) { (error: NSError!) in
+            print("handleOpenURL Error")
             self.loginFailure!(error)
         }
 
@@ -64,6 +67,7 @@ class TwitterClient: BDBOAuth1SessionManager {
             let tweets = Tweet.tweetsWithArray(dictionaries)
             success(tweets)
         }, failure: { (task: NSURLSessionDataTask?, error: NSError) in
+            print("homeTimeline Error")
             failure(error)
         })
     }
@@ -76,6 +80,7 @@ class TwitterClient: BDBOAuth1SessionManager {
             success(user)
             
             }, failure: { (task: NSURLSessionDataTask?, error: NSError) in
+                print("Account info Error")
                 failure(error)
         })
     }
@@ -86,7 +91,8 @@ class TwitterClient: BDBOAuth1SessionManager {
             success(tweet)
             
         }) { (task: NSURLSessionDataTask?, error: NSError) in
-                failure(error)
+            print("New Tweet Error")
+            failure(error)
         }
     }
     
@@ -94,7 +100,7 @@ class TwitterClient: BDBOAuth1SessionManager {
         POST("1.1/favorites/create.json", parameters: ["id":id], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
 //            print(response)
         }) { (task: NSURLSessionDataTask?, error: NSError) in
-                print(error.localizedDescription)
+                print("Add favorite error: \(error.localizedDescription)")
         }
     }
     
@@ -102,7 +108,7 @@ class TwitterClient: BDBOAuth1SessionManager {
         POST("1.1/favorites/destroy.json", parameters: ["id":id], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
             //            print(response)
         }) { (task: NSURLSessionDataTask?, error: NSError) in
-            print(error.localizedDescription)
+            print("Remove favorite error: \(error.localizedDescription)")
         }
     }
     
@@ -110,15 +116,35 @@ class TwitterClient: BDBOAuth1SessionManager {
         POST("1.1/statuses/retweet/\(id).json", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
 //                        print(response)
         }) { (task: NSURLSessionDataTask?, error: NSError) in
-            print(error.localizedDescription)
+            print("Retweet error: \(error.localizedDescription)")
         }
     }
     
     func unReTweet(id: Int) {
-        POST("1.1/statuses/unretweet/\(id).json", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
-            //            print(response)
+        var currentUserTweetID: String!
+        getTweetInfo(id, includeRetweet: true, success: { (tweet: Tweet) in
+            currentUserTweetID = tweet.currentUserReTweetID
+            print("currentUserTweetID: \(currentUserTweetID)")
+            print("TweetID: \(tweet.id)")
+            self.POST("1.1/statuses/unretweet/\(currentUserTweetID).json", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+                //            print(response)
+            }) { (task: NSURLSessionDataTask?, error: NSError) in
+                print("unReTweet error:" + error.localizedDescription)
+            }
+        }) { (error: NSError) in
+                print(error.localizedDescription)
+        }
+        
+        
+    }
+    
+    func getTweetInfo(id: Int, includeRetweet: Bool, success: (Tweet) -> (), failure: (NSError) -> ()) {
+        GET("1.1/statuses/show.json", parameters: ["id":id,"include_my_retweet": includeRetweet], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+            let tweet = Tweet(dictionary: response! as! NSDictionary)
+            success(tweet)
         }) { (task: NSURLSessionDataTask?, error: NSError) in
-            print(error.localizedDescription)
+                print("getTweetinfo Error")
+                failure(error)
         }
     }
     

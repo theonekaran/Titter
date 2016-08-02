@@ -8,12 +8,17 @@
 
 import UIKit
 
-class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NewTweetViewControllerDelegate {
+class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NewTweetViewControllerDelegate, TweetCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var newTweetButton: UIBarButtonItem!
     
     var tweets: [Tweet]!
+    
+    let likeImageON = UIImage(named: "like-action-on")
+    let likeImageOff = UIImage(named: "like-action-pressed")
+    let retweetImageON = UIImage(named: "retweet-action-on")
+    let retweetImageOff = UIImage(named: "retweet-action-pressed")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,10 +36,6 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         tableView.insertSubview(refreshControl, atIndex: 0)
         
         getTweets()
-        
-//        TwitterClient.sharedInstance.currentAccount()
-        
-        // Do any additional setup after loading the view.
     }
 
     override func didReceiveMemoryWarning() {
@@ -43,14 +44,56 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        print(tweets?.count)
         return tweets?.count ?? 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCellWithIdentifier("TweetCell", forIndexPath: indexPath) as! TweetCell
         cell.tweet = tweets[indexPath.row]
+        cell.delegate = self
+        if tweets[indexPath.row].isFavorite {
+            cell.likeButton.setImage(likeImageON, forState: .Normal)
+        } else {
+            cell.likeButton.setImage(likeImageOff, forState: .Normal)
+        }
+        
+        if tweets[indexPath.row].isRetweeted {
+            cell.reTweetButton.setImage(retweetImageON, forState: .Normal)
+        } else {
+            cell.reTweetButton.setImage(retweetImageOff, forState: .Normal)
+        }
         return cell
+    }
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        // do something here
+    }
+    
+    func tweetCell(tweetCell: TweetCell, didLike liked: Bool) {
+        let indexPath = tableView.indexPathForCell(tweetCell)!
+        if liked {
+            TwitterClient.sharedInstance.addFavorite(tweets[indexPath.row].id)
+            self.tweets[indexPath.row].isFavorite = true
+            tableView.reloadData()
+        } else {
+            TwitterClient.sharedInstance.removeFavorite(tweets[indexPath.row].id)
+            self.tweets[indexPath.row].isFavorite = false
+            tableView.reloadData()
+        }
+    }
+    
+    func tweetCell(tweetCell: TweetCell, didRetweet retweeted: Bool) {
+        let indexPath = tableView.indexPathForCell(tweetCell)!
+        if retweeted {
+            TwitterClient.sharedInstance.reTweet(tweets[indexPath.row].id)
+            self.tweets[indexPath.row].isRetweeted = true
+            tableView.reloadData()
+        } else {
+            TwitterClient.sharedInstance.unReTweet(tweets[indexPath.row].id)
+            self.tweets[indexPath.row].isRetweeted = false
+            tableView.reloadData()
+        }
     }
     
     func refreshControlAction(refreshControl: UIRefreshControl) {

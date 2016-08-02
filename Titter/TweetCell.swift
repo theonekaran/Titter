@@ -7,6 +7,12 @@
 //
 
 import UIKit
+import NSDate_TimeAgo
+
+@objc protocol TweetCellDelegate {
+    optional func tweetCell(tweetCell: TweetCell, didLike liked: Bool)
+    optional func tweetCell(tweetCell: TweetCell, didRetweet retweeted: Bool)
+}
 
 class TweetCell: UITableViewCell {
 
@@ -19,9 +25,10 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var reTweetButton: UIButton!
     @IBOutlet weak var likeButton: UIButton!
     
+    weak var delegate: TweetCellDelegate?
+    
     var liked: Bool = false
     var retweeted: Bool = false
-    
     
     let likeImageON = UIImage(named: "like-action-on")
     let likeImageOff = UIImage(named: "like-action-pressed")
@@ -33,26 +40,31 @@ class TweetCell: UITableViewCell {
             tweetLabel.text = tweet.text as? String
             userNameLabel.text = tweet.user?.name as? String
             screenNameLabel.text = tweet.user?.screenname! as? String
-            let formatter = NSDateFormatter()
-            formatter.dateFormat = "M/dd/yy"
-            timeStampLabel.text = formatter.stringFromDate(tweet.timestamp!)
+            timeStampLabel.text = tweet.timestamp?.timeAgoSimple()
             profileImageView.setImageWithURL((tweet.user?.profileURL)!)
+            liked = tweet.isFavorite
+            retweeted = tweet.isRetweeted
             
-            if tweet.isFavorite == 1 {
-                liked = true
-                likeButton.setImage(likeImageON, forState: .Normal)
-            } else {
-                liked = false
-            }
-            
-            if tweet.isRetweeted == 1 {
-                retweeted = true
-                reTweetButton.setImage(retweetImageON, forState: .Normal)
-            } else {
-                retweeted = false
-            }
         }
     }
+    @IBAction func didPressLikeButton(sender: AnyObject) {
+        if liked {
+            liked = false
+        } else {
+            liked = true
+        }
+        self.delegate?.tweetCell!(self, didLike: liked)
+    }
+    
+    @IBAction func didPressRetweetButton(sender: AnyObject) {
+        if retweeted {
+            retweeted = false
+        } else {
+            retweeted = true
+        }
+        self.delegate?.tweetCell!(self, didRetweet: retweeted)
+    }
+    
     
     override func awakeFromNib() {
         super.awakeFromNib()
