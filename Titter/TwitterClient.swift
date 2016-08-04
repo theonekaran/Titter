@@ -138,6 +138,18 @@ class TwitterClient: BDBOAuth1SessionManager {
         
     }
     
+    func userTimeline(screenName: String, success: ([Tweet]) -> (), failure: (NSError) -> ()) {
+        GET("1.1/statuses/user_timeline.json", parameters: ["screen_name":screenName], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+            let dictionaries = response as! [NSDictionary]
+            let tweets = Tweet.tweetsWithArray(dictionaries)
+            success(tweets)
+            }, failure: { (task: NSURLSessionDataTask?, error: NSError) in
+                print("homeTimeline Error")
+                failure(error)
+        })
+    }
+    
+    
     func getTweetInfo(id: Int, includeRetweet: Bool, success: (Tweet) -> (), failure: (NSError) -> ()) {
         GET("1.1/statuses/show.json", parameters: ["id":id,"include_my_retweet": includeRetweet], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
             let tweet = Tweet(dictionary: response! as! NSDictionary)

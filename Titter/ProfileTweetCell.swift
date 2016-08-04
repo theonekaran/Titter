@@ -1,21 +1,19 @@
 //
-//  TweetCell.swift
+//  ProfileTweetCell.swift
 //  Titter
 //
-//  Created by Karan Khurana on 7/29/16.
+//  Created by Karan Khurana on 8/2/16.
 //  Copyright © 2016 Karan Khurana. All rights reserved.
 //
 
 import UIKit
-import NSDate_TimeAgo
 
-@objc protocol TweetCellDelegate {
-    optional func tweetCell(tweetCell: TweetCell, didLike liked: Bool)
-    optional func tweetCell(tweetCell: TweetCell, didRetweet retweeted: Bool)
-    optional func tweetCell(tweetCell: TweetCell, didTapImage tapped: Bool)
+@objc protocol ProfileTweetCellDelegate {
+    optional func profileTweetCell(profileTweetCell: ProfileTweetCell, didLike liked: Bool)
+    optional func profileTweetCell(profileTweetCell: ProfileTweetCell, didRetweet retweeted: Bool)
 }
 
-class TweetCell: UITableViewCell {
+class ProfileTweetCell: UITableViewCell {
 
     @IBOutlet weak var tweetLabel: UILabel!
     @IBOutlet weak var profileImageView: UIImageView!
@@ -26,7 +24,7 @@ class TweetCell: UITableViewCell {
     @IBOutlet weak var reTweetButton: UIButton!
     @IBOutlet weak var likeButton: UIButton!
     
-    weak var delegate: TweetCellDelegate?
+    weak var delegate: ProfileTweetCellDelegate?
     
     var liked: Bool = false
     var retweeted: Bool = false
@@ -54,7 +52,7 @@ class TweetCell: UITableViewCell {
         } else {
             liked = true
         }
-        self.delegate?.tweetCell!(self, didLike: liked)
+        self.delegate?.profileTweetCell!(self, didLike: liked)
     }
     
     @IBAction func didPressRetweetButton(sender: AnyObject) {
@@ -63,10 +61,8 @@ class TweetCell: UITableViewCell {
         } else {
             retweeted = true
         }
-        self.delegate?.tweetCell!(self, didRetweet: retweeted)
+        self.delegate?.profileTweetCell!(self, didRetweet: retweeted)
     }
-    
-    
     
     
     override func awakeFromNib() {
@@ -76,22 +72,14 @@ class TweetCell: UITableViewCell {
         self.preservesSuperviewLayoutMargins = false
         profileImageView.layer.cornerRadius = 3
         profileImageView.clipsToBounds = true
-        var gesture = UITapGestureRecognizer.init(target: self, action: #selector(didTapProfileImage))
-        gesture.delegate = self
-        profileImageView.addGestureRecognizer(gesture)
         
     }
     
-    func didTapProfileImage() {
-        print("tapped")
-        var tapped: Bool = true
-        self.delegate?.tweetCell!(self, didTapImage: tapped)
-    }
-
     override func setSelected(selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
+        
         // Configure the view for the selected state
     }
+
 
 }

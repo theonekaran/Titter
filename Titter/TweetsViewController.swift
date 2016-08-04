@@ -115,6 +115,17 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
         TwitterClient.sharedInstance.logout()
     }
     
+    func tweetCell(tweetCell: TweetCell, didTapImage tapped: Bool) {
+        performSegueWithIdentifier("HomeToProfile", sender: tweetCell)
+    }
+    
+//    @IBAction func didTapProfileImage(sender: UITapGestureRecognizer) {
+//        self.performSegueWithIdentifier("HomeToProfile", sender: self)
+//        print(tableView.indexPathForRowAtPoint((sender.view?.center)!)!)
+//    }
+    
+    
+    
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
@@ -126,13 +137,19 @@ class TweetsViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let newTweetViewController = navigationController.topViewController as! NewTweetViewController
             
             newTweetViewController.delegate = self
-        } else if ((sender?.isKindOfClass(UITableViewCell)) == true) {
+        } else if segue.identifier == "TweetDetail" {
             var tweet: Tweet!
             let cell = sender as! UITableViewCell
             let indexPath = tableView.indexPathForCell(cell)
             tweet = tweets[indexPath!.row]
             let tweetDetailViewController = segue.destinationViewController as! TweetDetailViewController
             tweetDetailViewController.tweet = tweet
+        } else if segue.identifier == "HomeToProfile" {
+            let indexPath = tableView.indexPathForCell(sender as! UITableViewCell)
+            var tweet: Tweet!
+            tweet = tweets![indexPath!.row]
+            let profileViewController = segue.destinationViewController as! ProfileViewController
+            profileViewController.senderTweet = tweet
         }
     }
     
