@@ -76,7 +76,7 @@ class TweetCell: UITableViewCell {
         self.preservesSuperviewLayoutMargins = false
         profileImageView.layer.cornerRadius = 3
         profileImageView.clipsToBounds = true
-        var gesture = UITapGestureRecognizer.init(target: self, action: #selector(didTapProfileImage))
+        let gesture = UITapGestureRecognizer.init(target: self, action: #selector(didTapProfileImage))
         gesture.delegate = self
         profileImageView.addGestureRecognizer(gesture)
         
@@ -84,8 +84,7 @@ class TweetCell: UITableViewCell {
     
     func didTapProfileImage() {
         print("tapped")
-        var tapped: Bool = true
-        self.delegate?.tweetCell!(self, didTapImage: tapped)
+        self.delegate?.tweetCell!(self, didTapImage: true)
     }
 
     override func setSelected(selected: Bool, animated: Bool) {

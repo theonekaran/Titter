@@ -8,15 +8,21 @@
 
 import UIKit
 
-class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UIScrollViewDelegate, SegmentCellDelegate {
 
     @IBOutlet weak var tableView: UITableView!
     
     var tweets: [Tweet]!
     var headerSection: Int = 0
-    var tweetsSection: Int = 1
+    var tweetsSection: Int = 2
+    var segmentSection: Int = 1
+    
+    @IBOutlet weak var headerSegmentControl: UISegmentedControl!
     
     var senderTweet: Tweet!
+    var senderScreenName: String!
+    
+    @IBOutlet weak var segmentView: UIView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,6 +31,10 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         tableView.estimatedRowHeight = 100
         tableView.rowHeight = UITableViewAutomaticDimension
         self.tableView.separatorInset = UIEdgeInsetsZero
+        
+        getUser()
+        
+        self.navigationItem.title = senderScreenName
         
         getTweets()
 
@@ -36,29 +46,37 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
         // Dispose of any resources that can be recreated.
     }
     
+    @IBAction func didSelectHeaderSection(sender: AnyObject) {
+        if headerSegmentControl.selectedSegmentIndex == 0 {
+            getTweets()
+        } else if headerSegmentControl.selectedSegmentIndex == 2 {
+            getMedia()
+        }
+    }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return 2
+        return 3
     }
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if section == headerSection {
+        if section == headerSection || section == segmentSection {
             return 1
         } else {
             return tweets?.count ?? 0
         }
     }
     
-    func tableView(tableView: UITableView, willDisplayFooterView view: UIView, forSection section: Int) {
-        view.tintColor = UIColor.lightGrayColor()
-    }
     
     func tableView(tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 10
+        if section == segmentSection {
+            return 8
+        } else {
+            return 0
+        }
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        if indexPath.section == 0 {
+        if indexPath.section == headerSection {
             let cell = tableView.dequeueReusableCellWithIdentifier("ProfileHeaderCell", forIndexPath: indexPath) as! ProfileHeaderCell
             if senderTweet != nil {
                 cell.user = senderTweet.user
@@ -66,26 +84,72 @@ class ProfileViewController: UIViewController, UITableViewDelegate, UITableViewD
                 cell.user = User.currentUser
             }
             return cell
-        } else if indexPath.section == 1 {
+        } else if indexPath.section == segmentSection {
+            let cell = tableView.dequeueReusableCellWithIdentifier("SegmentCell", forIndexPath: indexPath) as! SegmentCell
+            cell.segmentIndex = headerSegmentControl.selectedSegmentIndex
+            cell.delegate = self
+            return cell
+        } else if indexPath.section == tweetsSection {
             let cell = tableView.dequeueReusableCellWithIdentifier("ProfileTweetCell", forIndexPath: indexPath) as! ProfileTweetCell
             cell.tweet = tweets[indexPath.row]
             return cell
-        } else {
+        }  else {
             let cell = UITableViewCell()
             return cell
         }
     }
     
-    func getTweets() {
-        var screenName: String
-        if senderTweet != nil {
-            screenName = senderTweet.user.screenname! as String
-        } else {
-            screenName = User.currentUser?.screenname! as! String
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+    }
+    
+    func segmentCell(segmentCell: SegmentCell, didSelectSegment segment: Int) {
+        segmentCell.segmentControl.selectedSegmentIndex = segment
+        headerSegmentControl.selectedSegmentIndex = segment
+        if segment == 0 {
+            getTweets()
+        } else if segment == 1 {
+            getTweets()
+        } else if segment == 2 {
+            getMedia()
         }
-        TwitterClient.sharedInstance.userTimeline(screenName, success:  { (tweets: [Tweet]) in
+    }
+    
+    func scrollViewDidScroll(scrollView: UIScrollView) {
+        if scrollView.contentOffset.y > 205 {
+            segmentView.hidden = false
+        } else {
+            segmentView.hidden = true
+        }
+        
+        if scrollView.contentOffset.y > 0 && scrollView.contentOffset.y < 40 {
+            self.navigationController?.navigationBar
+        }
+    }
+    
+    func getUser() {
+        if senderTweet != nil {
+            senderScreenName = senderTweet.user.screenname! as String
+        } else {
+            senderScreenName = User.currentUser?.screenname! as! String
+        }
+    }
+    
+    func getMedia() {
+        TwitterClient.sharedInstance.userLikes(senderScreenName, success: { (tweets: [Tweet]) in
             self.tweets = tweets
             self.tableView.reloadSections(NSIndexSet(index: self.tweetsSection), withRowAnimation: .None)
+            self.tableView.reloadSections(NSIndexSet(index: self.segmentSection), withRowAnimation: .None)
+        }) { (error: NSError) in
+            print(error.localizedDescription)
+        }
+    }
+    
+    func getTweets() {
+        TwitterClient.sharedInstance.userTimeline(senderScreenName, success:  { (tweets: [Tweet]) in
+            self.tweets = tweets
+            self.tableView.reloadSections(NSIndexSet(index: self.tweetsSection), withRowAnimation: .None)
+            self.tableView.reloadSections(NSIndexSet(index: self.segmentSection), withRowAnimation: .None)
             }, failure: { (error: NSError) in
                 print(error.localizedDescription)
         })

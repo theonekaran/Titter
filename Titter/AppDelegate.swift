@@ -19,10 +19,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         
         if User.currentUser != nil {
+//            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//            let vc = storyboard.instantiateViewControllerWithIdentifier("TweetsNavigationController")
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let vc = storyboard.instantiateViewControllerWithIdentifier("TweetsNavigationController")
+            let hamburgerViewController = storyboard.instantiateViewControllerWithIdentifier("hamburgerViewController") as! HamburgerViewController
+            let menuViewController = storyboard.instantiateViewControllerWithIdentifier("menuViewController") as! MenuViewController
             
-            window?.rootViewController = vc
+            menuViewController.hamburgerViewController = hamburgerViewController
+            hamburgerViewController.menuViewController = menuViewController
+            
+            window?.rootViewController = hamburgerViewController
         }
         
         NSNotificationCenter.defaultCenter().addObserverForName(User.userDidLogoutNotification, object: nil, queue: NSOperationQueue.mainQueue()) { (NSNotification) in
@@ -30,6 +36,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let vc = storyboard.instantiateInitialViewController()
             self.window?.rootViewController = vc
         }
+        
+//        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+//        let hamburgerViewController = storyboard.instantiateViewControllerWithIdentifier("hamburgerViewController") as! HamburgerViewController
+//        let menuViewController = storyboard.instantiateViewControllerWithIdentifier("menuViewController") as! MenuViewController
+//        
+//        menuViewController.hamburgerViewController = hamburgerViewController
+//        hamburgerViewController.menuViewController = menuViewController
+//        
+//        window?.rootViewController = hamburgerViewController
+        
+        
+        
+        
         
         return true
     }

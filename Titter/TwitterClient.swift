@@ -144,7 +144,29 @@ class TwitterClient: BDBOAuth1SessionManager {
             let tweets = Tweet.tweetsWithArray(dictionaries)
             success(tweets)
             }, failure: { (task: NSURLSessionDataTask?, error: NSError) in
-                print("homeTimeline Error")
+                print("userTimeline Error")
+                failure(error)
+        })
+    }
+    
+    func mentionsTimeline(success: ([Tweet]) -> (), failure: (NSError) -> ()) {
+        GET("1.1/statuses/mentions_timeline.json", parameters: nil, progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+            let dictionaries = response as! [NSDictionary]
+            let tweets = Tweet.tweetsWithArray(dictionaries)
+            success(tweets)
+            }, failure: { (task: NSURLSessionDataTask?, error: NSError) in
+                print("mentionsTimeline Error")
+                failure(error)
+        })
+    }
+    
+    func userLikes(screenName: String, success: ([Tweet]) -> (), failure: (NSError) -> ()) {
+        GET("1.1/favorites/list.json", parameters: ["screen_name":screenName], progress: nil, success: { (task: NSURLSessionDataTask, response: AnyObject?) in
+            let dictionaries = response as! [NSDictionary]
+            let tweets = Tweet.tweetsWithArray(dictionaries)
+            success(tweets)
+            }, failure: { (task: NSURLSessionDataTask?, error: NSError) in
+                print("userLikes Error")
                 failure(error)
         })
     }
